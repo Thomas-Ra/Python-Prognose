@@ -2,12 +2,24 @@
 # Created by ...
 __version__ = 0.01
 
-def MarketPrediction():
-    print('Hello World')
+import logging 
+from configparser import ConfigParser
 
+def MarketPrediction():
+    print('Market Prediction is starting up...')
+    logging.info('Market Prediction started')
+
+#CONFIG
+config = ConfigParser()
+config.read("../config.ini")
+
+    
 #DB
 
-#Logging 
+#Logging
+SERVERCONFIG = config["SERVERCONFIG"]
+logging.basicConfig(filename='SERVERCONFIG,["LOGGING_LOCATION"]', encoding='utf-8', level=logging.SERVERCONFIG,["LOGGING_LEVEL"])
+print (SERVERCONFIG)
 
 #GUI
 
