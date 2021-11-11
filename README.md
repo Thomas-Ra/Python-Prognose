@@ -41,3 +41,6 @@ Where do we get our data from
 ## 
 
 
+# Stock Info
+
+Stock info is base don the Nasdaq Stock Exchange in NYC.
