@@ -1,1 +1,1 @@
-American Holidays?
+American Holidays? TRA: Da ist die Börse geschlossen und es sollte keine Daten für die Tage geben.
