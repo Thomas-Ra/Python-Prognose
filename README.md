@@ -11,6 +11,10 @@ Uni Project WS21
 
 ## Installation 
 > "Cause money is every foundation"
+pip install tensorflow
+pip install yahoo-fin
+pip install -U scikit-learn
+pip install pandas
 
 #### scripts
 #### db
@@ -43,4 +47,4 @@ Where do we get our data from
 
 # Stock Info
 
-Stock info is base don the Nasdaq Stock Exchange in NYC.
+Stock info is based on the Nasdaq Stock Exchange in NYC.
