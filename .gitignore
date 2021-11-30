@@ -1,3 +1,6 @@
+scripts
+pyvenv.cfg
+Cudnn
 # Environments
 .env
 .venv
