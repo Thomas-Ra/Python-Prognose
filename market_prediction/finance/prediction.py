@@ -227,16 +227,16 @@ UNITS = 256
 DROPOUT = 0.4
 
 # whether to use bidirectional RNNs
-BIDIRECTIONAL = False
+BIDIRECTIONAL = True
 
 ### training parameters
 LOSS = "huber_loss" # loss function used for the regression problem
 OPTIMIZER = "adam" # optimizer algorithm
 BATCH_SIZE = 64 # number of data samples used in each training iteration
-EPOCHS = 500 # number of times the algorithm will pass through the entire training set; higher number is recommended
+EPOCHS = 1000 # number of times the algorithm will pass through the entire training set; higher number is recommended
 
 # Amazon stock market
-ticker = "AMZN"
+ticker = "TSLA"
 ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
 
 # model name to save, making it as unique as possible based on parameters
