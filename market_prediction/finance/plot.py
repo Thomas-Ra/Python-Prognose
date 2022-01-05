@@ -8,7 +8,7 @@ def make_plot(stock, period = "10d", interval = "15m"):
 
     avg_30 = data.Close.rolling(window=30, min_periods=1).mean()
 
-    # Create figure with secondary y-axis
+    # Graph mit zweiter y-Achse anlegen
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     # Add traces
@@ -17,13 +17,13 @@ def make_plot(stock, period = "10d", interval = "15m"):
         secondary_y=False,
     )
 
-    #remove weekends and time between 4pm and 9:30am (market closed)
-    fig.update_xaxes(
-        rangebreaks=[
-            { 'pattern': 'day of week', 'bounds': [6, 1]},
-            { 'pattern': 'hour', 'bounds':[16,9.5]}
-        ]
-    )
+    # #remove weekends and time between 4pm and 9:30am (market closed)
+    # fig.update_xaxes(
+    #     rangebreaks=[
+    #         { 'pattern': 'day of week', 'bounds': [6, 1]},
+    #         { 'pattern': 'hour', 'bounds':[16,9.5]}
+    #     ]
+    # )
 
     fig.add_trace(
         go.Scatter(x=data.index, y=avg_30, name='Moving Average of 30 periods', mode="lines"),
@@ -36,15 +36,15 @@ def make_plot(stock, period = "10d", interval = "15m"):
     )
 
 
-    # Add figure title
+    # Überschrift
     fig.update_layout(
-        title_text="TSLA Stock Info"
+        title_text=stock + " Stock Info"
     )
 
-    # Set x-axis title
+    # x-achse Titel
     fig.update_xaxes(title_text="time")
 
-    # Set y-axes titles
+    # y-achsen Titel
     fig.update_yaxes(title_text="Stock Price in USD", secondary_y=False)
     fig.update_yaxes(title_text="Volume", secondary_y=True, range=[0,32000000])
 

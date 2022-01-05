@@ -1,4 +1,3 @@
-# import necessary libraries
 import matplotlib.pyplot as plt #needed for model testing
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -6,27 +5,25 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-# python scraper of yahoo finance (not a reliable API)
+# python scraper für yahoo finance
 from yahoo_fin import stock_info as si
 from collections import deque
 
 import os
-import time #needed for Model Training
+import time
 import numpy as np
 import pandas as pd
 import random
 
-# set seed, so we can get the same results after rerunning several times
+# seed speichern um die gleichen Ergebnisse zu erhalten
 np.random.seed(314)
 tf.random.set_seed(314)
 random.seed(314)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#Preparing our Dataset
-#-----------------------------------------------------------------------------------------------------------------------
+#Vorbereitung des Datasets
 
 def shuffle_in_unison(a, b):
-    # shuffle two arrays in the same way
+    # mischen der beiden arrays auf die gleiche Art und Weise
     state = np.random.get_state()
     np.random.shuffle(a)
     np.random.set_state(state)
@@ -36,59 +33,58 @@ def shuffle_in_unison(a, b):
 def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True,
                 test_size=0.2, feature_columns=['adjclose', 'volume', 'open', 'high', 'low']):
     """
-    Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
+    Lädt und verabreitet Daten von Yahoo Finance
     Params:
-        ticker (str/pd.DataFrame): the ticker you want to load, examples include AAPL, TESL, etc.
-        n_steps (int): the historical sequence length (i.e window size) used to predict, default is 50
-        scale (bool): whether to scale prices from 0 to 1, default is True
-        shuffle (bool): whether to shuffle the dataset (both training & testing), default is True
-        lookup_step (int): the future lookup step to predict, default is 1 (e.g next day)
-        split_by_date (bool): whether we split the dataset into training/testing by date, setting it 
-            to False will split datasets in a random way
-        test_size (float): ratio for test data, default is 0.2 (20% testing data)
-        feature_columns (list): the list of features to use to feed into the model, default is everything grabbed from yahoo_fin
+        ticker (str/pd.DataFrame): Aktiensymbol, das zu untersuchen ist
+        n_steps (int): die Länge der historischen Sequenz (d. h. die Größe des Fensters), die für die Vorhersage verwendet wird, default: 50
+        scale (bool): Sollen die PReise normalisiert werden auf [0,1]; default: True
+        shuffle (bool): soll das Datenset gemischt werden?; default: True
+        lookup_step (int): der vorauszusagende zukünftige Suchschritt, default: 1 (z. B. nächster Tag)
+        split_by_date (bool): sollen Testdaten nach Training/Testing Datum gesplitted werden; wenn nicht dann ist der split random
+        test_size (float): Anteil der Testdaten
+        feature_columns (list): Liste der Merkmale, die in das Modell eingespeist werden sollen; Standard ist alles, was von yahoo_fin übergeben wird
     """
-    # see if ticker is already a loaded stock from yahoo finance
+    # wurde Ticker bereits geladen?; es kann ein Dataframe oder ein Aktiensymbol übergeben werden
     if isinstance(ticker, str):
-        # load it from yahoo_fin library
+        # von yahoo finance anfragen
         df = si.get_data(ticker)
     elif isinstance(ticker, pd.DataFrame):
-        # already loaded, use it directly
+        # wenn bereits gealden, einfach verwenden
         df = ticker
     else:
-        raise TypeError("ticker can be either a str or a `pd.DataFrame` instances")
+        raise TypeError("ticker muss entweder ein String (Aktiensymbol) oder eine `pd.DataFrame` Instanz sein")
     
-    # this will contain all the elements we want to return from this function
+    # Rückgabewert der Funktion initialisieren
     result = {}
 
-    # we will also return the original dataframe itself
+    # yahoo finance dataframe wird mit zurückgegeben
     result['df'] = df.copy()
 
-    # make sure that the passed feature_columns exist in the dataframe
+    # überprüfen ob die zu betrachtenden Merkamle gültig/im Dataframe enthalten sind
     for col in feature_columns:
-        assert col in df.columns, f"'{col}' does not exist in the dataframe."
+        assert col in df.columns, f"'{col}' existiert nicht im dataframe."
     
-    # add date as a column
+    # Datum als Spalte hinzufügen
     if "date" not in df.columns:
         df["date"] = df.index
     if scale:
         column_scaler = {}
-        # scale the data (prices) from 0 to 1
+        # normalisieren der Werte auf 0 bis 1
         for column in feature_columns:
             scaler = preprocessing.MinMaxScaler()
             df[column] = scaler.fit_transform(np.expand_dims(df[column].values, axis=1))
             column_scaler[column] = scaler
-        # add the MinMaxScaler instances to the result returned
+        # scaler zum Rückgabewert hinzufügen
         result["column_scaler"] = column_scaler
     
-    # add the target column (label) by shifting by `lookup_step`
+    # Zielspalte (label) durch Verschiebung um `lookup_step` hinzufügen
     df['future'] = df['adjclose'].shift(-lookup_step)
-    # last `lookup_step` columns contains NaN in future column
+    # letzte `lookup_step` Spalten enthalten NaN in der Spalte für die Zukunft
 
-    # get them before droping NaNs
+    # speichern der Spalten bevor die NaN's entfernt werden
     last_sequence = np.array(df[feature_columns].tail(lookup_step))
     
-    # drop NaNs
+    # NaNs entfernen
     df.dropna(inplace=True)
     sequence_data = []
     sequences = deque(maxlen=n_steps)
@@ -97,155 +93,149 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         sequences.append(entry)
         if len(sequences) == n_steps:
             sequence_data.append([np.array(sequences), target])
-    # get the last sequence by appending the last `n_step` sequence with `lookup_step` sequence
-    # for instance, if n_steps=50 and lookup_step=10, last_sequence should be of 60 (that is 50+10) length
-    # this last_sequence will be used to predict future stock prices that are not available in the dataset
+    # Erhalte die letzte Sequenz durch Anhängen der letzten `n_step`-Sequenz an die `lookup_step`-Sequenz.
+    # Wenn zum Beispiel n_steps=50 und lookup_step=10, sollte last_sequence 60 (also 50+10) lang sein.
+    # Diese last_sequence wird zur Vorhersage zukünftiger Aktienkurse verwendet, die im Datensatz nicht vorhanden sind.
     last_sequence = list([s[:len(feature_columns)] for s in sequences]) + list(last_sequence)
     last_sequence = np.array(last_sequence).astype(np.float32)
 
-    # add to result
+    # zum Ergebnis hinzufügen
     result['last_sequence'] = last_sequence
 
-    # construct the X's and y's
+    # X's and y's aufbauen
     X, y = [], []
     for seq, target in sequence_data:
         X.append(seq)
         y.append(target)
     
-    # convert to numpy arrays
+    # umwandeln zu numpy arrays
     X = np.array(X)
     y = np.array(y)
     if split_by_date:
-        # split the dataset into training & testing sets by date (not randomly splitting)
+        # Aufteilung des Datensatzes in Trainings- und Testsätze nach Datum
         train_samples = int((1 - test_size) * len(X))
         result["X_train"] = X[:train_samples]
         result["y_train"] = y[:train_samples]
         result["X_test"]  = X[train_samples:]
         result["y_test"]  = y[train_samples:]
         if shuffle:
-            # shuffle the datasets for training (if shuffle parameter is set)
+            #die Datensätze für das Training zu mischen (wenn der Parameter shuffle gesetzt ist)
             shuffle_in_unison(result["X_train"], result["y_train"])
             shuffle_in_unison(result["X_test"], result["y_test"])
     else:    
-        # split the dataset randomly
+        # Datensatz zufällig aufteilen
         result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(X, y, 
                                                                                 test_size=test_size, shuffle=shuffle)
     
-    # get the list of test set dates
+    # Liste der Daten der Testreihe abrufen
     dates = result["X_test"][:, -1, -1]
    
-    # retrieve test features from the original dataframe
+    # Abrufen von Testmerkmalen aus dem ursprünglichen Datenrahmen
     result["test_df"] = result["df"].loc[dates]
    
-    # remove duplicated dates in the testing dataframe
+    # doppelte Daten im Testdatenrahmen entfernen
     result["test_df"] = result["test_df"][~result["test_df"].index.duplicated(keep='first')]
    
-    # remove dates from the training/testing sets & convert to float32
+    # Daten aus den Trainings-/Testsätzen entfernen und in float32 konvertieren
     result["X_train"] = result["X_train"][:, :, :len(feature_columns)].astype(np.float32)
     result["X_test"] = result["X_test"][:, :, :len(feature_columns)].astype(np.float32)
     return result
 
-#----------------------------------------------------------------------------------------------------------------------------------------
-# Model Creation
-#----------------------------------------------------------------------------------------------------------------------------------------
-# RNN with Keras
-# flexible model
-# number of layers, dropout rate, rnn cell, loss and the optimizer can be changed
-# function creates an RNN (Recurrent neural network)
-# RNNs are neural nets especially usefull for modelling sequence data like time series
-# Keras is designed for its simplicity and easy configuration
+# Modelerstellung
+
+# RNN mit Keras erstellen
+# flexibles model
+# Anzahl der layer, Abbruchquote, rnn cell, lossund der Optimierer können angepasst werden
 def create_model(sequence_length, n_features, units=256, cell=LSTM, n_layers=2, dropout=0.3,
                 loss="mean_absolute_error", optimizer="rmsprop", bidirectional=False):
     model = Sequential()
     for i in range(n_layers):
         if i == 0:
-            # first layer
+            # erstes layer
             if bidirectional:
                 model.add(Bidirectional(cell(units, return_sequences=True), batch_input_shape=(None, sequence_length, n_features)))
             else:
                 model.add(cell(units, return_sequences=True, batch_input_shape=(None, sequence_length, n_features)))
         elif i == n_layers - 1:
-            # last layer
+            # letztes layer
             if bidirectional:
                 model.add(Bidirectional(cell(units, return_sequences=False)))
             else:
                 model.add(cell(units, return_sequences=False))
         else:
-            # hidden layers
+            # versteckte layers
             if bidirectional:
                 model.add(Bidirectional(cell(units, return_sequences=True)))
             else:
                 model.add(cell(units, return_sequences=True))
-        # add dropout after each layer
+        # Abbruchquote(dropout) nach jedem layer hinzufügen
         model.add(Dropout(dropout))
     model.add(Dense(1, activation="linear"))
     model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
     return model
 
-#----------------------------------------------------------------------------------------------------------------------------------------
 # Model Training
-#----------------------------------------------------------------------------------------------------------------------------------------
 
-# Window size or the sequence length
+# Länge der historischen Sequenz
 N_STEPS = 50
 
-# Lookup step, 1 is the next day
+# Lookup step, 1 ist der nächste Tag
 LOOKUP_STEP = 15
 
-# whether to scale feature columns & output price as well
+# ob die Merkmalsspalten und der Ausgabepreis skaliert werden sollen
 SCALE = True
 scale_str = f"sc-{int(SCALE)}"
 
-# whether to shuffle the dataset
+# soll der Datensatz gemischt werden
 SHUFFLE = True
 shuffle_str = f"sh-{int(SHUFFLE)}"
 
-# whether to split the training/testing set by date
+# ob der Trainings-/Testsatz nach Datum aufgeteilt werden soll
 SPLIT_BY_DATE = False
 split_by_date_str = f"sbd-{int(SPLIT_BY_DATE)}"
 
-# test ratio size, 0.2 is 20%
+# Test-Datensatz-Split, 0.2 is 20%
 TEST_SIZE = 0.2
 
-# features we use to predict the next price value
+# Merkmale, die wir zur Vorhersage des nächsten Kurswerts verwenden
 FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low"]
 
 # date now
 date_now = time.strftime("%Y-%m-%d")
 
-### model parameters
-# number of RNN layers we want to use
+### model parameter
+# Anzahl RNN layers die wir nutzen
 N_LAYERS = 2
 
-# RNN cell to use, default is LSTM cell
+# RNN cell die genutzt werden soll, default: LSTM cell
 CELL = LSTM
 
-# 256 LSTM neurons
+# 256 LSTM neuronen
 UNITS = 256
 
 # 40% dropout
 DROPOUT = 0.4
 
-# whether to use bidirectional RNNs
+# bidirectional RNNs nutzen
 BIDIRECTIONAL = True
 
-### training parameters
-LOSS = "huber_loss" # loss function used for the regression problem
-OPTIMIZER = "adam" # optimizer algorithm
-BATCH_SIZE = 64 # number of data samples used in each training iteration
-EPOCHS = 1000 # number of times the algorithm will pass through the entire training set; higher number is recommended
+### Training-Parameter
+LOSS = "huber_loss" # loss Funktion für regression
+OPTIMIZER = "adam" # optimizer algorithmus
+BATCH_SIZE = 64 # Anzahl der in jeder Trainingsiteration verwendeten Datenproben
+EPOCHS = 1000 # Anzahl der Durchläufe des Algorithmus durch die gesamte Trainingsmenge; eine höhere Zahl wird empfohlen
 
-# Amazon stock market
+# Aktiensymbol
 ticker = "TSLA"
 ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
 
-# model name to save, making it as unique as possible based on parameters
+# model Name zum speichern
 model_name = f"{date_now}_{ticker}-{shuffle_str}-{scale_str}-{split_by_date_str}-\
 {LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}"
 if BIDIRECTIONAL:
     model_name += "-b"
 
-# create these folders if they does not exist
+# Ordner anlegen, sollten sie noch nicht da sein
 if not os.path.isdir("results"):
     os.mkdir("results")
 if not os.path.isdir("logs"):
@@ -253,21 +243,19 @@ if not os.path.isdir("logs"):
 if not os.path.isdir("data"):
     os.mkdir("data")
 
-#---------------------------------------------------------------------------------------------------------------------
-# load the data
+# Daten laden
 data = load_data(ticker, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, 
                 shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, 
                 feature_columns=FEATURE_COLUMNS)
-# save the dataframe
+# dataframe speichern
 data["df"].to_csv(ticker_data_filename)
-# construct the model
+# model aufbauen
 model = create_model(N_STEPS, len(FEATURE_COLUMNS), loss=LOSS, units=UNITS, cell=CELL, n_layers=N_LAYERS,
                     dropout=DROPOUT, optimizer=OPTIMIZER, bidirectional=BIDIRECTIONAL)
-# some tensorflow callbacks
+# tensorflow callbacks
 checkpointer = ModelCheckpoint(os.path.join("results", model_name + ".h5"), save_weights_only=True, save_best_only=True, verbose=1)
 tensorboard = TensorBoard(log_dir=os.path.join("logs", model_name))
-# train the model and save the weights whenever we see 
-# a new optimal model using ModelCheckpoint
+# trainiere das Modell und speichere die Wichtungen, wenn wir ein neues optimales Modell mit ModelCheckpoint
 history = model.fit(data["X_train"], data["y_train"],
                     batch_size=BATCH_SIZE,
                     epochs=EPOCHS,
@@ -275,115 +263,95 @@ history = model.fit(data["X_train"], data["y_train"],
                     callbacks=[checkpointer, tensorboard],
                     verbose=1)
 
-#--------------------------------------------------------------------------------------------------------------------
-# Plotting Predicition and Reality
-#--------------------------------------------------------------------------------------------------------------------
-# function plots the true and predicted values into he same plot
-def plot_graph(test_df):
-    """
-    This function plots true close price along with predicted close price
-    with blue and red colors respectively
-    """
-    plt.plot(test_df[f'true_adjclose_{LOOKUP_STEP}'], c='b')
-    plt.plot(test_df[f'adjclose_{LOOKUP_STEP}'], c='r')
-    plt.xlabel("Days")
-    plt.ylabel("Price")
-    plt.legend(["Actual Price", "Predicted Price"])
-    plt.show()
-
-#--------------------------------------------------------------------------------------------------------------------
-# Constructs dataframe 
-#--------------------------------------------------------------------------------------------------------------------
-# dataframe includes the adjclose as well as calculating buy and sell profit
+# dataframe aufbauen 
+# dataframe beinhaltet den adjclose sowie die Berechnung des Kauf- und Verkaufsgewinns
 def get_final_df(model, data):
     """
-    This function takes the `model` and `data` dict to 
-    construct a final dataframe that includes the features along 
-    with true and predicted prices of the testing dataset
+    Diese Funktion nimmt die dicts "model" und "data", um 
+    um einen endgültigen dataframe zu erstellen, der die Merkmale zusammen 
+    mit den wahren und vorhergesagten Preisen des Testdatensatzes enthält.
     """
-    # if predicted future price is higher than the current, 
-    # then calculate the true future price minus the current price, to get the buy profit
+    # wenn der vorhergesagte zukünftige Preis höher ist als der aktuelle, 
+    # dann berechne den wahren zukünftigen Preis minus den aktuellen Preis, um den Kaufgewinn zu erhalten
     buy_profit  = lambda current, pred_future, true_future: true_future - current if pred_future > current else 0
-    # if the predicted future price is lower than the current price,
-    # then subtract the true future price from the current price
+    # wenn der vorhergesagte zukünftige Preis niedriger ist als der aktuelle Preis,
+    # dann subtrahieren wir den wahren zukünftigen Preis vom aktuellen Preis
     sell_profit = lambda current, pred_future, true_future: current - true_future if pred_future < current else 0
     X_test = data["X_test"]
     y_test = data["y_test"]
-    # perform prediction and get prices
+    # Prognosen erstellen und Preise ermitteln
     y_pred = model.predict(X_test)
     if SCALE:
         y_test = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(np.expand_dims(y_test, axis=0)))
         y_pred = np.squeeze(data["column_scaler"]["adjclose"].inverse_transform(y_pred))
     test_df = data["test_df"]
-    # add predicted future prices to the dataframe
+    # Hinzufügen der voraussichtlichen künftigen Preise zum Datenrahmen
     test_df[f"adjclose_{LOOKUP_STEP}"] = y_pred
-    # add true future prices to the dataframe
+    # Hinzufügen echter zukünftiger Preise zum Datenrahmen
     test_df[f"true_adjclose_{LOOKUP_STEP}"] = y_test
-    # sort the dataframe by date
+    # sortieren des dataframe nach Datum
     test_df.sort_index(inplace=True)
     final_df = test_df
-    # add the buy profit column
+    # die Spalte für den Kaufgewinn hinzufügen
     final_df["buy_profit"] = list(map(buy_profit, 
                                     final_df["adjclose"], 
                                     final_df[f"adjclose_{LOOKUP_STEP}"], 
                                     final_df[f"true_adjclose_{LOOKUP_STEP}"])
-                                    # since we don't have profit for last sequence, add 0's
+                                    # da wir keinen Gewinn für die letzte Sequenz haben, fügen wir 0 hinzu
                                     )
-    # add the sell profit column
+    # die Spalte für den Verkaufsgewinn hinzufügen
     final_df["sell_profit"] = list(map(sell_profit, 
                                     final_df["adjclose"], 
                                     final_df[f"adjclose_{LOOKUP_STEP}"], 
                                     final_df[f"true_adjclose_{LOOKUP_STEP}"])
-                                    # since we don't have profit for last sequence, add 0's
+                                    # da wir keinen Gewinn für die letzte Sequenz haben, fügen wir 0 hinzu
                                     )
     return final_df
 
-#--------------------------------------------------------------------------------------------------------------------
-# Predicting next future price
-#--------------------------------------------------------------------------------------------------------------------
+# Vorhersage des nächsten zukünftigen Preises
 def predict(model, data):
-    # retrieve the last sequence from data
+    # die letzte Sequenz aus den Daten abrufen
     last_sequence = data["last_sequence"][-N_STEPS:]
-    # expand dimension
+    # Dimensionen erweitern
     last_sequence = np.expand_dims(last_sequence, axis=0)
-    # get the prediction (scaled from 0 to 1)
+    # die Vorhersage erhalten (skaliert von 0 bis 1)
     prediction = model.predict(last_sequence)
-    # get the price (by inverting the scaling)
+    # den Preis ermitteln (durch Umkehrung der Skalierung)
     if SCALE:
         predicted_price = data["column_scaler"]["adjclose"].inverse_transform(prediction)[0][0]
     else:
         predicted_price = prediction[0][0]
     return predicted_price
 
-# load optimal model weights from results folder
+# optimale Modellgewichte aus dem Ergebnisordner laden
 model_path = os.path.join("results", model_name) + ".h5"
 model.load_weights(model_path)
 
-# evaluate the model
+# Evaluierung des Models
 loss, mae = model.evaluate(data["X_test"], data["y_test"], verbose=0)
-# calculate the mean absolute error (inverse scaling)
+# Berechnung des mittleren absoluten Fehlers (inverse Skalierung)
 if SCALE:
     mean_absolute_error = data["column_scaler"]["adjclose"].inverse_transform([[mae]])[0][0]
 else:
     mean_absolute_error = mae
 
-# get the final dataframe for the testing set
+# den endgültigen Datenrahmen für den Testsatz abrufen
 final_df = get_final_df(model, data)
 
-# predict the future price
+# zukünftigen Preis vorhersagen
 future_price = predict(model, data)
 
-# we calculate the accuracy by counting the number of positive profits
+# accuracy = Anzahl positiver Profite
 accuracy_score = (len(final_df[final_df['sell_profit'] > 0]) + len(final_df[final_df['buy_profit'] > 0])) / len(final_df)
-# calculating total buy & sell profit
+# Berechnung des gesamten Kauf- und Verkaufsgewinns
 total_buy_profit  = final_df["buy_profit"].sum()
 total_sell_profit = final_df["sell_profit"].sum()
-# total profit by adding sell & buy together
+# Gesamtgewinn durch Addition von Verkauf und Kauf
 total_profit = total_buy_profit + total_sell_profit
-# dividing total profit by number of testing samples (number of trades)
+# Dividieren des Gesamtgewinns durch die Anzahl der Testmuster (Anzahl der Abschlüsse)
 profit_per_trade = total_profit / len(final_df)
 
-# printing metrics
+# print Metriken
 print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
 print(f"{LOSS} loss:", loss)
 print("Mean Absolute Error:", mean_absolute_error)
@@ -393,13 +361,33 @@ print("Total sell profit:", total_sell_profit)
 print("Total profit:", total_profit)
 print("Profit per trade:", profit_per_trade)
 
-# plot true/pred prices graph
-plot_graph(final_df)
-
 print(final_df.tail(10))
-# save the final dataframe to csv-results folder
+
+# Speichern des endgültigen dataframes im Ordner csv-results
 csv_results_folder = "csv-results"
 if not os.path.isdir(csv_results_folder):
     os.mkdir(csv_results_folder)
 csv_filename = os.path.join(csv_results_folder, model_name + ".csv")
 final_df.to_csv(csv_filename)
+
+# #--------------------------------------------------------------------------------------------------------------------
+# # Plotting Predicition and Reality
+# #--------------------------------------------------------------------------------------------------------------------
+# # function plots the true and predicted values into he same plot
+# def plot_graph(test_df):
+#     """
+#     This function plots true close price along with predicted close price
+#     with blue and red colors respectively
+#     """
+#     plt.plot(test_df[f'true_adjclose_{LOOKUP_STEP}'], c='b')
+#     plt.plot(test_df[f'adjclose_{LOOKUP_STEP}'], c='r')
+#     plt.xlabel("Days")
+#     plt.ylabel("Price")
+#     plt.legend(["Actual Price", "Predicted Price"])
+#     plt.show()
+
+
+
+
+# # plot true/pred prices graph
+# plot_graph(final_df)
