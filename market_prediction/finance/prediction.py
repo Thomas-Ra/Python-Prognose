@@ -15,6 +15,8 @@ import numpy as np
 import pandas as pd
 import random
 
+from plot import make_plot
+
 # seed speichern um die gleichen Ergebnisse zu erhalten
 np.random.seed(314)
 tf.random.set_seed(314)
@@ -226,7 +228,7 @@ BATCH_SIZE = 64 # Anzahl der in jeder Trainingsiteration verwendeten Datenproben
 EPOCHS = 1000 # Anzahl der Durchläufe des Algorithmus durch die gesamte Trainingsmenge; eine höhere Zahl wird empfohlen
 
 # Aktiensymbol
-ticker = "TSLA"
+ticker = "AAPL"
 ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
 
 # model Name zum speichern
@@ -385,9 +387,6 @@ final_df.to_csv(csv_filename)
 #     plt.ylabel("Price")
 #     plt.legend(["Actual Price", "Predicted Price"])
 #     plt.show()
-
-
-
 
 # # plot true/pred prices graph
 # plot_graph(final_df)
