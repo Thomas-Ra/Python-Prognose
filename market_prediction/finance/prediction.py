@@ -139,4 +139,4 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
 
     save_df(final_df, model_name)
 
-predictTicker("AAPL", EPOCHS=1)
+# predictTicker("AAPL", EPOCHS=1)
