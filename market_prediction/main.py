@@ -7,16 +7,14 @@ import os
 import gui.gui
 from configparser import ConfigParser
 from webserver import server
-from finance import make_plot
 
 
 def MarketPrediction():
     print('Market Prediction is starting up...')
-    make_plot("TSLA")
 
 #Call GUI Class
     logging.info('GUI started')
-    gui()
+    #gui()
 
 #Call Wevserver Class
     webserver = server.handler()
