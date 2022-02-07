@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
-# Created by ...
-__version__ = 0.01
+# Created by [WS21-Group C] 
+__version__ = 1.0
 
 import logging 
-from configparser import ConfigParser
 import os
 import gui.gui
-from finance.finance import make_plot
+from configparser import ConfigParser
+from webserver import server
+from finance import make_plot
+
 
 def MarketPrediction():
     print('Market Prediction is starting up...')
-    logging.info('Market Prediction started')
     make_plot("TSLA")
+
+#Call GUI Class
+    logging.info('GUI started')
     gui()
+
+#Call Wevserver Class
+    webserver = server.handler()
+    webserver.mainloop()
+    logging.info('Webserver started')
+
+    logging.info('Market Prediction started')
 
 #CONFIG
 config = ConfigParser()
 config.read(os.getcwd() + "\config.ini")
 
-
-    
-#DB
-
 #Logging
 SERVERCONFIG = config["SERVERCONFIG"]
 logging.basicConfig(filename=SERVERCONFIG["LOGGING_LOCATION"], encoding='utf-8', level=SERVERCONFIG["LOGGING_LEVEL"])
 
-#GUI
-
+#MAIN
 if __name__ == '__main__':
     MarketPrediction()
