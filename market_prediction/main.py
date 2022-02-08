@@ -1,36 +1,32 @@
-#!/usr/bin/env python3
-# Created by [WS21-Group C] 
-__version__ = 1.0
+#please use python version 3.7 or lower
+_version__ = 1.0
 
 import logging 
 import os
-import gui.gui
 from configparser import ConfigParser
-from webserver import server
 
-
-def MarketPrediction():
-    print('Market Prediction is starting up...')
+#start the webserver
+def server_start():
+    from webserver import server
+    server.start_in_thread()
+    logging.info('Webserver started')
+    
 
 #Call GUI Class
+def display():
+    import gui.gui
     logging.info('GUI started')
-    #gui()
-
-#Call Wevserver Class
-    webserver = server.handler()
-    webserver.mainloop()
-    logging.info('Webserver started')
-
-    logging.info('Market Prediction started')
-
-#CONFIG
-config = ConfigParser()
-config.read(os.getcwd() + "\config.ini")
 
 #Logging
-SERVERCONFIG = config["SERVERCONFIG"]
-logging.basicConfig(filename=SERVERCONFIG["LOGGING_LOCATION"], encoding='utf-8', level=SERVERCONFIG["LOGGING_LEVEL"])
+def init_config():    
+    config = ConfigParser()
+    config.read(os.getcwd() + "\config.ini")
+    SERVERCONFIG = config["SERVERCONFIG"]
+    logging.basicConfig(filename=SERVERCONFIG["LOGGING_LOCATION"], level=SERVERCONFIG["LOGGING_LEVEL"])
+    logging.info('Config initialized')
 
 #MAIN
 if __name__ == '__main__':
-    MarketPrediction()
+    init_config()
+    server_start()
+    display()

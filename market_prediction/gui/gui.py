@@ -4,12 +4,10 @@ from tkinter import *
 from cefpython3 import cefpython as cef
 import ctypes
 import os
-from market_prediction.finance.prediction import predictTicker
+from finance.prediction import predictTicker
 #from PIL import ImageTk, Image
 
-
-
-def main():
+def start_gui():
     root = Tk()
     cef.Initialize()
 
@@ -33,45 +31,46 @@ def main():
     mainside = Frame(root, bg='black', width=1100)
     mainside.grid(row=0, column=0, columnspan=1, rowspan=1, sticky='NSWE', pady=5, padx=5)
 
+    baseUrl = "http://127.0.0.1:8080/"
 
     def display_apple():
         global url1
-        url1 = "http://127.0.0.1:8080/Apple.html"
+        url1 = baseUrl + "Apple.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
     def display_amazon():
         global url1
-        url1 = "127.0.0.1:8080/Amazon.html"
+        url1 = baseUrl + "Amazon.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
     def display_gamestop():
         global url1
-        url1 = "127.0.0.1:8080/GameStop.html"
+        url1 = baseUrl + "GameStop.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
     def display_microsoft():
         global url1
-        url1 = "http://87.106.170.163/Microsoft.html"
+        url1 = baseUrl + "Microsoft.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
     def display_tesla():
         global url1
-        url1 = "http://87.106.170.163/Tesla.html"
+        url1 = baseUrl + "Tesla.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
     def display_google():
         global url1
-        url1 = "http://87.106.170.163/Google.html"
+        url1 = baseUrl + "Google.html"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
@@ -359,5 +358,4 @@ class FocusHandler(object):
         #logger.debug("FocusHandler.OnGotFocus")
         pass
 
-
-main()
+start_gui()

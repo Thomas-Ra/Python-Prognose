@@ -28,3 +28,9 @@ Stock info is based on the Nasdaq Stock Exchange in NYC.
 - Vorhersage wurde basiert auf Tutorial gefunden unter: https://www.thepythoncode.com/article/stock-price-prediction-in-python-using-tensorflow-2-and-keras ( Parameter wurden optimiert und der Code umstrukturiert + erweitert)
 - Verständnis und Umstrukturierung hat natürlich noch tensorflow Verständnis vorausgesetzt: https://www.tensorflow.org/api_docs/python/tf/keras
 - Die Visualisierung wurde mithilfe der Plotly Doku umgesetzt: https://plotly.com/python/candlestick-charts/
+
+# Start
+
+``
+py .\market_prediction\main.py
+``

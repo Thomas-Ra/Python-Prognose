@@ -8,9 +8,9 @@ import time
 import numpy as np
 import random
 
-from loadData import load_data 
-from model import create_model, predict
-from saveData import save_df, get_final_df
+from .loadData import load_data
+from .model import create_model, predict
+from .saveData import save_df, get_final_df
 
 def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS = 2, BIDIRECTIONAL = True, BATCH_SIZE = 64, EPOCHS = 1000):
     """
