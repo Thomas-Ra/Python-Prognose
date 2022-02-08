@@ -66,26 +66,3 @@ def make_plot(stock, data, showResult= False, saveResult= True, includeCandles =
     if showResult:
         fig.show()
     fig.write_html("./html/"+stock+".html")
-
-
-aapl = pd.read_csv("./csv-results/2022-01-08_AAPL-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-amzn = pd.read_csv("./csv-results/2022-01-07_AMZN-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-gme = pd.read_csv("./csv-results/2022-01-07_GME-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-goog = pd.read_csv("./csv-results/2022-01-08_GOOG-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-msft = pd.read_csv("./csv-results/2022-01-08_MSFT-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-tsla = pd.read_csv("./csv-results/2022-01-08_TSLA-sh-1-sc-1-sbd-0-huber_loss-adam-LSTM-seq-50-step-15-layers-2-units-256-b.csv")
-
-#fix the unnamed column
-aapl.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-amzn.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-gme.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-goog.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-msft.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-tsla.rename( columns={'Unnamed: 0':'date'}, inplace=True )
-
-make_plot("Amazon", amzn)
-make_plot("Apple", aapl)
-make_plot("GameStop", gme)
-make_plot("Google", goog)
-make_plot("Microsoft", msft)
-make_plot("Tesla", tsla)

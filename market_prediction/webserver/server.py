@@ -3,7 +3,7 @@ import socketserver
 import threading
 
 PORT = 8080
-DIRECTORY = "./market_prediction/finance/html"
+DIRECTORY = "./market_prediction/finance/displayResults"
 
 class handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):

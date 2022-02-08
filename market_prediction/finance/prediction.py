@@ -7,10 +7,12 @@ import os
 import time
 import numpy as np
 import random
+import pandas as pd
 
 from .loadData import load_data
 from .model import create_model, predict
 from .saveData import save_df, get_final_df
+from .plot import make_plot
 
 def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS = 2, BIDIRECTIONAL = True, BATCH_SIZE = 64, EPOCHS = 1000):
     """
@@ -126,17 +128,22 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
     profit_per_trade = total_profit / len(final_df)
 
     # print Metriken
-    print(f"Future price after {LOOKUP_STEP} days is {future_price:.2f}$")
-    print(f"{LOSS} loss:", loss)
-    print("Mean Absolute Error:", mean_absolute_error)
-    print("Accuracy score:", accuracy_score)
-    print("Total buy profit:", total_buy_profit)
-    print("Total sell profit:", total_sell_profit)
-    print("Total profit:", total_profit)
-    print("Profit per trade:", profit_per_trade)
-
-    print(final_df.tail(10))
+    data = [
+        ['Loss:', loss],  
+        ['Mean Absolute Error:', mean_absolute_error],
+        ['Accuracy score:', accuracy_score], 
+        ['Total buy profit:', total_buy_profit], 
+        ['Total sell profit:', total_sell_profit], 
+        ['Total profit:', total_profit], 
+        ['Profit per trade:', profit_per_trade]
+    ]
+    for item in range:
+        print('{} {}'.format(item[0],item[1]))
+     # Create the pandas DataFrame
+    df = pd.DataFrame(data, columns = ['Label', 'Value'])
+    df.to_csv("./displayResults/"+stock+".csv")
 
     save_df(final_df, model_name)
-
-# predictTicker("AAPL", EPOCHS=1)
+    plot_df = final_df
+    plot_df.rename( columns={'Unnamed: 0':'date'}, inplace=True )
+    make_plot(ticker, plot_df)

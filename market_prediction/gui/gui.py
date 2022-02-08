@@ -33,66 +33,21 @@ def start_gui():
 
     baseUrl = "http://127.0.0.1:8080/"
 
-    def display_apple():
-        global url1
-        url1 = baseUrl + "Apple.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
-    def display_amazon():
-        global url1
-        url1 = baseUrl + "Amazon.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
-    def display_gamestop():
-        global url1
-        url1 = baseUrl + "GameStop.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
-    def display_microsoft():
-        global url1
-        url1 = baseUrl + "Microsoft.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
-    def display_tesla():
-        global url1
-        url1 = baseUrl + "Tesla.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
-    def display_google():
-        global url1
-        url1 = baseUrl + "Google.html"
-        browser_frame = BrowserFrame(mainside)
-        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
-        return url1
-
     def display():
         global url1
-        chart_selected = gui_list.get(ANCHOR)
+        selected = gui_list.get(ANCHOR)
         browser_frame = BrowserFrame(mainside)
-        #if (chart_selected == ""):
-            #browser_frame.pack(fill=tk.BOTH, expand=tk.YES)
-        if (chart_selected == "Tesla"):
-            display_tesla()
-        if (chart_selected == "Amazon"):
-            display_amazon()
-        if (chart_selected == "Apple"):
-            display_apple()
-        if (chart_selected == "Gamestop"):
-            display_gamestop()
-        if (chart_selected == "Google"):
-            display_google()
-        if (chart_selected == "Microsoft"):
-            display_microsoft()
+        
+        url1 = baseUrl + selected +".html"
+        browser_frame = BrowserFrame(mainside)
+        browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
+
+#TODO:
+        # df = pd.read_csv(baseUrl + selected +".csv")
+        # for item in df:
+            
+
+        return url1
 
 
     #--------------------------
@@ -140,17 +95,17 @@ def start_gui():
 
     gachamenu = Menu(menu)
     menu.add_cascade(label="Aktien", menu=gachamenu)
-    gachamenu.add_command(label="Amazon [AMZN]", command=display_amazon)
+    gachamenu.add_command(label="AMZN", command=display)
     gachamenu.add_separator()
-    gachamenu.add_command(label="Apple [APPL]", command=display_apple)
+    gachamenu.add_command(label="AAPL", command=display)
     gachamenu.add_separator()
-    gachamenu.add_command(label="Gamestop [GME]", command=display_gamestop)
+    gachamenu.add_command(label="GME", command=display)
     gachamenu.add_separator()
-    gachamenu.add_command(label="Google [GOOG]", command=display_google)
+    gachamenu.add_command(label="GOOG", command=display)
     gachamenu.add_separator()
-    gachamenu.add_command(label="Microsoft [MSFT]", command=display_microsoft)
+    gachamenu.add_command(label="MSFT", command=display)
     gachamenu.add_separator()
-    gachamenu.add_command(label="Tesla [TSLA]", command=display_tesla)
+    gachamenu.add_command(label="TSLA", command=display)
 
     helpmenu = Menu(menu)
     menu.add_cascade(label="Help", menu=helpmenu)
@@ -204,7 +159,7 @@ def start_gui():
     gui_list.grid(row=0, column=0, rowspan=1, pady=35, sticky=N)
 
     # Liste befüllen >>>
-    list_main_stocks = ["Amazon", "Apple", "Gamestop", "Google", "Microsoft", "Tesla"]
+    list_main_stocks = ["AMZN", "AAPL", "GME", "GOOG", "MSFT", "TSLA"]
 
     for item in list_main_stocks:
         gui_list.insert(END, item)
