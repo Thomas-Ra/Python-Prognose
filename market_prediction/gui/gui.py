@@ -3,7 +3,9 @@ import tkinter.messagebox
 from tkinter import *
 from cefpython3 import cefpython as cef
 import ctypes
-from PIL import ImageTk, Image
+import os
+from market_prediction.finance.prediction import predictTicker
+#from PIL import ImageTk, Image
 
 
 
@@ -110,6 +112,13 @@ def main():
     def display_popup():
         tkinter.messagebox.showwarning(title="Daten neu berechnen",message="Das könnte eine Weile dauern...")
 
+    def display_generate():
+        selected_chart = gui_list.get(ANCHOR)
+        if (selected_chart == ""):
+            tkinter.messagebox.showerror(title="ERROR", message="Du hast keine Aktie ausgewählt.")
+        else:
+            predictTicker(selected_chart)
+
 
 
     display_start()
@@ -204,7 +213,7 @@ def main():
     # text (rightside)
     rightside1_text = Label(rightside, text="Auswahl der Aktie", bg="#bed1bc", font=("times",14, "bold"))
     rightside1_text.grid(row=0, column=0, sticky=N, pady=5)
-    rightside2_text = Button(rightside, text="regenerate data", bg="#bed1bc", font=('Helvetica',12, "bold"), command=display_popup)
+    rightside2_text = Button(rightside, text="regenerate data", bg="#bed1bc", font=('Helvetica',12, "bold"), command=display_generate)
     rightside2_text.grid(row=1, column=0)
     rightside3_text = Label(rightside, text="", bg="#bed1bc")
     rightside3_text.grid(row=2, column=0, sticky=W, padx=5)
