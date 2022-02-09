@@ -56,6 +56,7 @@ def start_gui():
     # EVENTS
     root.bind("<Alt-q>", quit)
 
+
     def display_start():
         global url1
         url1 = "https://i.ytimg.com/vi/if-2M3K1tqk/maxresdefault.jpg"
@@ -63,15 +64,72 @@ def start_gui():
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
+#...
     def display_popup():
-        tkinter.messagebox.showwarning(title="Daten neu berechnen",message="Das könnte eine Weile dauern...")
+        global pop
+        pop = Toplevel(root)
+        pop.title("Prognosen-Konfigurator")
+        pop.geometry("450x280")
+        pop.config(bg="#a8eda6")
+
+        pop_label_width = 14
+
+    #Erstelen der Labels / Titel
+        pop_label = Label(pop, text="Ticker", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label.grid(row = 0, column=0)
+        pop_label1 = Label(pop, text="N_STEPS", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label1.grid(row=1, column=0)
+        pop_label2 = Label(pop, text="LOOKUP_STEP", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label2.grid(row=2, column=0)
+        pop_label3 = Label(pop, text="TEST_SIZE", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label3.grid(row=3, column=0)
+        pop_label4 = Label(pop, text="N_LAYERS", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label4.grid(row=4, column=0)
+        pop_label5 = Label(pop, text="BIDIRECTIONAL", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label5.grid(row=5, column=0)
+        pop_label6 = Label(pop, text="BATCH_SIZE", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label6.grid(row=6, column=0)
+        pop_label7 = Label(pop, text="EPOCHS", fg="white", bg="#4c754b", width=pop_label_width)
+        pop_label7.grid(row=7, column=0)
+
+#ticker, N_STEPS=50,LOOKUP_STEP = 50, TEST_SIZE = 0.2, N_LAYERS = 2, BIDIRECTIONAL = True, BATCH_SIZE = 64, EPOCHS = 1000
+#input Text als Entry-Widget
+        pop_input = Entry(pop)
+        pop_input.insert(END, "AAPL")
+        pop_input.grid(row=0, column=1)
+        pop_input1 = Entry(pop)
+        pop_input1.insert(END, "50")
+        pop_input1.grid(row=1, column=1)
+        pop_input2 = Entry(pop)
+        pop_input2.insert(END, "50")
+        pop_input2.grid(row=2, column=1)
+        pop_input3 = Entry(pop)
+        pop_input3.insert(END, "0.2")
+        pop_input3.grid(row=3, column=1)
+        pop_input4 = Entry(pop)
+        pop_input4.insert(END, "2")
+        pop_input4.grid(row=4, column=1)
+        pop_input5 = Entry(pop)
+        pop_input5.insert(END, "True")
+        pop_input5.grid(row=5, column=1)
+        pop_input6 = Entry(pop)
+        pop_input6.insert(END, "64")
+        pop_input6.grid(row=6, column=1)
+        pop_input7 = Entry(pop)
+        pop_input7.insert(END, "1000")
+        pop_input7.grid(row=7, column=1)
+
+    #button einbinden zum submitten
+        pop_button = Button(pop, text="Generate", command="generate")
+        pop_button.grid(row=8, column=0, columnspan=2, sticky=NSEW)
 
     def display_generate():
         selected_chart = gui_list.get(ANCHOR)
         if (selected_chart == ""):
             tkinter.messagebox.showerror(title="ERROR", message="Du hast keine Aktie ausgewählt.")
         else:
-            predictTicker(selected_chart)
+            display_popup()
+            #predictTicker(selected_chart)
 
 
 
