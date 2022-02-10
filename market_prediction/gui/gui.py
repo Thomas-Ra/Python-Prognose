@@ -159,8 +159,13 @@ def start_gui():
         pop_info7 = Button(pop, text=popup_text, command=lambda: display_info(epochs_info))
         pop_info7.grid(row=7, column=2)
 
-
         def submit():
+            info_label = Label(pop, text="", bg="#6f8f75", fg="white", width=45, height=15, wraplength=280)
+            info_label.grid(row=1, column=3, rowspan=6, padx=15)
+            pl = PrintLogger(info_label)
+
+            # replace sys.stdout with our object
+            sys.stdout = pl
             predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get()))
 
         def start_submit_thread(event):
@@ -420,6 +425,17 @@ class FocusHandler(object):
 
     def OnGotFocus(self, **_):
         #logger.debug("FocusHandler.OnGotFocus")
+        pass
+
+class PrintLogger(): # create file like object
+    def __init__(self, label): # pass reference to text widget
+        self.label = label # keep ref
+
+    def write(self, text):
+        self.label['text'] += text # write text to textbox
+            # could also scroll to end of textbox here to make sure always visible
+
+    def flush(self): # needed for file like object
         pass
 
 start_gui()
