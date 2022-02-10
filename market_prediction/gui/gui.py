@@ -4,6 +4,8 @@ from tkinter import *
 from cefpython3 import cefpython as cef
 import ctypes
 import os
+import sys
+from io import StringIO
 from finance.prediction import predictTicker
 #from PIL import ImageTk, Image
 
@@ -21,7 +23,6 @@ def start_gui():
     #Grid.columnconfigure(root, 4, weight=1)
 
     root.title("Stock Market Prediction")
-
 
     # DEF
     def quit(event=None):
@@ -69,10 +70,18 @@ def start_gui():
         global pop
         pop = Toplevel(root)
         pop.title("Prognosen-Konfigurator")
-        pop.geometry("450x280")
+        pop.geometry("620x340")
         pop.config(bg="#a8eda6")
-
         pop_label_width = 14
+
+        def display_info(plain_info="Ändern Sie die Paramter, um die Prognose anzupassen. Je nach Wert wird das Ergebnis und der Zeitaufwand verändert."
+                                    " Klicken Sie auf den Info-Button, falls sie sich unsicher sind. "
+                                    "Die Standardwerte sind empfohlene Durchschnittswerte"):
+            plain_info1 = plain_info
+            info_label = Label(pop, text=plain_info1, bg="#6f8f75", fg="white", width=45, height=15, wraplength=280)
+            info_label.grid(row=1, column=3, rowspan=6, padx=15)
+
+        display_info()
 
     #Erstelen der Labels / Titel
         pop_label = Label(pop, text="Ticker", fg="white", bg="#4c754b", width=pop_label_width)
@@ -94,14 +103,15 @@ def start_gui():
 
 #ticker, N_STEPS=50,LOOKUP_STEP = 50, TEST_SIZE = 0.2, N_LAYERS = 2, BIDIRECTIONAL = True, BATCH_SIZE = 64, EPOCHS = 1000
 #input Text als Entry-Widget
+        selected_chart = gui_list.get(ANCHOR)
         pop_input = Entry(pop)
-        pop_input.insert(END, "AAPL")
+        pop_input.insert(END, selected_chart)
         pop_input.grid(row=0, column=1)
         pop_input1 = Entry(pop)
         pop_input1.insert(END, "50")
         pop_input1.grid(row=1, column=1)
         pop_input2 = Entry(pop)
-        pop_input2.insert(END, "50")
+        pop_input2.insert(END, "15")
         pop_input2.grid(row=2, column=1)
         pop_input3 = Entry(pop)
         pop_input3.insert(END, "0.2")
@@ -116,12 +126,47 @@ def start_gui():
         pop_input6.insert(END, "64")
         pop_input6.grid(row=6, column=1)
         pop_input7 = Entry(pop)
-        pop_input7.insert(END, "1000")
+        pop_input7.insert(END, "2")
         pop_input7.grid(row=7, column=1)
 
+#Info-Panel einfügen
+        ticker_info = "Ticker \n Aktiensymbol, das zu untersuchen ist [str]"
+        n_steps_info = "n_steps \n Die Länge der historischen Sequenz (d. h. die Größe des Fensters), die für die Vorhersage verwendet wird [int]"
+        lookup_step_info = "lookup_step \n der vorauszusagende zukünftige Suchschritt, default: 1 (z. B. nächster Tag) [int]"
+        test_size_info = "test_size \n Anteil der Testdaten [int]"
+        n_layers_info = "n_layers \n Anzahl RNN layers die wir nutzen [int]"
+        bidirectional_info = "bidirectional_info \n bidirectional RNNs nutzen [bool]"
+        batch_size_info = "batch_size_info \n Anzahl der in jeder Trainingsiteration verwendeten Datenproben [int]"
+        epochs_info = "epochs_info \n Anzahl der Durchläufe des Algorithmus durch die gesamte Trainingsmenge; eine hohe Zahl wird empfohlen [int]"
+
+        popup_text = "?"
+        pop_info = Button(pop, text=popup_text, command=lambda: display_info(ticker_info))
+        pop_info.grid(row=0, column=2)
+        pop_info1 = Button(pop, text=popup_text, command=lambda: display_info(n_steps_info))
+        pop_info1.grid(row=1, column=2)
+        pop_info2 = Button(pop, text=popup_text, command=lambda: display_info(lookup_step_info))
+        pop_info2.grid(row=2, column=2)
+        pop_info3 = Button(pop, text=popup_text, command=lambda: display_info(test_size_info))
+        pop_info3.grid(row=3, column=2)
+        pop_info4 = Button(pop, text=popup_text, command=lambda: display_info(n_layers_info))
+        pop_info4.grid(row=4, column=2)
+        pop_info5 = Button(pop, text=popup_text, command=lambda: display_info(bidirectional_info))
+        pop_info5.grid(row=5, column=2)
+        pop_info6 = Button(pop, text=popup_text, command=lambda: display_info(batch_size_info))
+        pop_info6.grid(row=6, column=2)
+        pop_info7 = Button(pop, text=popup_text, command=lambda: display_info(epochs_info))
+        pop_info7.grid(row=7, column=2)
+
+
+    #def console_to_String():
+        #asd_label = Label(pop, text="asd", bg="black", width=15, height=15)
+        #asd_label.grid(row=9, column=0)
+
+
     #button einbinden zum submitten
-        pop_button = Button(pop, text="Generate", command="generate")
-        pop_button.grid(row=8, column=0, columnspan=2, sticky=NSEW)
+        pop_button = Button(pop, text="Generate", command=lambda: predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get())))
+        pop_button.grid(row=9, column=0, columnspan=3, sticky=NSEW)
+
 
     def display_generate():
         selected_chart = gui_list.get(ANCHOR)
