@@ -1,5 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox
+import logging
+import threading
 from tkinter import *
 from cefpython3 import cefpython as cef
 import ctypes
@@ -158,13 +160,17 @@ def start_gui():
         pop_info7.grid(row=7, column=2)
 
 
-    #def console_to_String():
-        #asd_label = Label(pop, text="asd", bg="black", width=15, height=15)
-        #asd_label.grid(row=9, column=0)
+        def submit():
+            predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get()))
 
+        def start_submit_thread(event):
+            global submit_thread
+            submit_thread = threading.Thread(target=submit)
+            submit_thread.daemon = True
+            submit_thread.start()
 
-    #button einbinden zum submitten
-        pop_button = Button(pop, text="Generate", command=lambda: predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get())))
+        #button einbinden zum submitten
+        pop_button = Button(pop, text="Generate", command=lambda: start_submit_thread(None))
         pop_button.grid(row=9, column=0, columnspan=3, sticky=NSEW)
 
 
