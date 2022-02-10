@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 
 import os
+import logging 
 import time
 import numpy as np
 import random
@@ -27,6 +28,7 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
             epochs (int): Anzahl der Durchläufe des Algorithmus durch die gesamte Trainingsmenge; eine hohe Zahl wird empfohlen
         """
 
+    logging.info('Prediction gestartet')
     # seed speichern um die gleichen Ergebnisse zu erhalten
     np.random.seed(314)
     tf.random.set_seed(314)
@@ -83,6 +85,7 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
     data = load_data(ticker, N_STEPS, scale=SCALE, split_by_date=SPLIT_BY_DATE, 
                     shuffle=SHUFFLE, lookup_step=LOOKUP_STEP, test_size=TEST_SIZE, 
                     feature_columns=FEATURE_COLUMNS)
+    logging.info('Aktiendaten vom Server geladen')
     # dataframe speichern
     data["df"].to_csv(ticker_data_filename)
     # model aufbauen
@@ -92,6 +95,7 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
     checkpointer = ModelCheckpoint(os.path.join("results", model_name + ".h5"), save_weights_only=True, save_best_only=True, verbose=1)
     tensorboard = TensorBoard(log_dir=os.path.join("logs", model_name))
     # trainiere das Modell und speichere die Wichtungen, wenn wir ein neues optimales Modell mit ModelCheckpoint
+    logging.info('Model Training wird gestartet')
     history = model.fit(data["X_train"], data["y_train"],
                         batch_size=BATCH_SIZE,
                         epochs=EPOCHS,
@@ -104,6 +108,7 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
     model.load_weights(model_path)
 
     # Evaluierung des Models
+    logging.info('Model wird evaluiert')
     loss, mae = model.evaluate(data["X_test"], data["y_test"], verbose=0)
     # Berechnung des mittleren absoluten Fehlers (inverse Skalierung)
     if SCALE:
@@ -142,8 +147,11 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
      # Create the pandas DataFrame
     df = pd.DataFrame(data, columns = ['Label', 'Value'])
     df.to_csv("./displayResults/"+stock+".csv")
+    logging.info('Ergebnisse wurden lokal gespeichert')
 
     save_df(final_df, model_name)
     plot_df = final_df
     plot_df.rename( columns={'Unnamed: 0':'date'}, inplace=True )
     make_plot(ticker, plot_df)
+    
+    logging.info('Prediction abgeschlossen')

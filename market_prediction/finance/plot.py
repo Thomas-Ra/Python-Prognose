@@ -1,4 +1,5 @@
 import yfinance as yf
+import logging 
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -66,3 +67,5 @@ def make_plot(stock, data, showResult= False, saveResult= True, includeCandles =
     if showResult:
         fig.show()
     fig.write_html("./html/"+stock+".html")
+    
+    logging.info('Plot lokal gespeichert')
