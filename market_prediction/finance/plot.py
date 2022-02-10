@@ -19,7 +19,7 @@ def make_plot(stock, data, showResult= False, saveResult= True, includeCandles =
     # Add traces
     if includeCandles:
         fig.add_trace(
-            go.Candlestick(x=data["date"], open=data['open'], high=data['high'], low=data['low'], close=data['close'], name='market data'),
+            go.Candlestick(x=data.index, open=data['open'], high=data['high'], low=data['low'], close=data['close'], name='market data'),
             secondary_y=False,
         )
 
@@ -36,20 +36,20 @@ def make_plot(stock, data, showResult= False, saveResult= True, includeCandles =
         avg_30 = data['adjclose_15'].rolling(window=30, min_periods=1).mean()
         avg_30_true = data['true_adjclose_15'].rolling(window=30, min_periods=1).mean()
         fig.add_trace(
-            go.Scatter(x=data["date"], y=avg_30, name='Moving Average of 30 periods', mode="lines"),
+            go.Scatter(x=data.index, y=avg_30, name='Moving Average of 30 periods', mode="lines"),
             secondary_y=False,
         )
         fig.add_trace(
-            go.Scatter(x=data["date"], y=avg_30_true, name='Moving Average of 30 periods predicted', mode="lines"),
+            go.Scatter(x=data.index, y=avg_30_true, name='Moving Average of 30 periods predicted', mode="lines"),
             secondary_y=False,
         )
     else: 
         fig.add_trace(
-            go.Scatter(x=data["date"], y=data['true_adjclose_15'], name='Close', mode="lines"),
+            go.Scatter(x=data.index, y=data['true_adjclose_15'], name='Close', mode="lines"),
             secondary_y=False,
         )
         fig.add_trace(
-            go.Scatter(x=data["date"], y=data['adjclose_15'], name='Close predicted', mode="lines"),
+            go.Scatter(x=data.index, y=data['adjclose_15'], name='Close predicted', mode="lines"),
             secondary_y=False,
         )
 
@@ -66,6 +66,6 @@ def make_plot(stock, data, showResult= False, saveResult= True, includeCandles =
 
     if showResult:
         fig.show()
-    fig.write_html("./html/"+stock+".html")
+    fig.write_html("./market_prediction/finance/displayResults/"+stock+".html")
     
     logging.info('Plot lokal gespeichert')

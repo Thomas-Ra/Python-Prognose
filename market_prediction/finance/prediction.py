@@ -142,16 +142,15 @@ def predictTicker(ticker, N_STEPS=50,LOOKUP_STEP = 15, TEST_SIZE = 0.2, N_LAYERS
         ['Total profit:', total_profit], 
         ['Profit per trade:', profit_per_trade]
     ]
-    for item in range:
+    for item in data:
         print('{} {}'.format(item[0],item[1]))
      # Create the pandas DataFrame
     df = pd.DataFrame(data, columns = ['Label', 'Value'])
-    df.to_csv("./displayResults/"+stock+".csv")
+    df.to_csv("./market_prediction/finance/displayResults/"+ticker+".csv")
     logging.info('Ergebnisse wurden lokal gespeichert')
 
     save_df(final_df, model_name)
     plot_df = final_df
-    plot_df.rename( columns={'Unnamed: 0':'date'}, inplace=True )
     make_plot(ticker, plot_df)
     
     logging.info('Prediction abgeschlossen')
