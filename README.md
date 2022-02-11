@@ -12,7 +12,7 @@ Um die Verarbeitung erheblich zu beschleunigen wird, wenn möglich, empfohlen di
 https://www.tensorflow.org/install/gpu#software_requirements
 
 ### Cefpython 
-Zu credetieren ist hierbei auch das Modulbeispiel: https://github.com/cztomczak/cefpython/blob/master/examples/tkinter_.py 
+Zu kredetieren ist hierbei auch das Modulbeispiel: https://github.com/cztomczak/cefpython/blob/master/examples/tkinter_.py 
 Dies wird genutzt für das einbinden von HTML Websiten in Tkinter. 
 
 - Woher weiß ich, dass die Installation erfolgreich war und meine Berechnung jetzt sehr viel schneller ist?
