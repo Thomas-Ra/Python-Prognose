@@ -1,10 +1,14 @@
 import tkinter as tk
 import tkinter.messagebox
+import logging
+import threading
 from tkinter import *
 from cefpython3 import cefpython as cef
 import ctypes
 import os
 import sys
+import csv
+import pandas as pd
 from io import StringIO
 from finance.prediction import predictTicker
 #from PIL import ImageTk, Image
@@ -79,7 +83,7 @@ def start_gui():
                                     "Die Standardwerte sind empfohlene Durchschnittswerte"):
             plain_info1 = plain_info
             info_label = Label(pop, text=plain_info1, bg="#6f8f75", fg="white", width=45, height=15, wraplength=280)
-            info_label.grid(row=1, column=3, rowspan=6, padx=15)
+            info_label.grid(row=0, column=3, rowspan=10, padx=15, pady=5)
 
         display_info()
 
@@ -157,17 +161,30 @@ def start_gui():
         pop_info7 = Button(pop, text=popup_text, command=lambda: display_info(epochs_info))
         pop_info7.grid(row=7, column=2)
 
+#Button zum Absenden der eingegeben Paramter
+        def submit():
+            info_label = Label(pop, text="", bg="#6f8f75", fg="white", width=45, height=15, wraplength=280, justify="left")
+            info_label.grid(row=0, column=3, rowspan=10, padx=15, pady=5)
+            pl = PrintLogger(info_label)
+            pop_button.configure(state=DISABLED)
+            # replace sys.stdout with our object
+            sys.stdout = pl
+            predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get()))
 
-    #def console_to_String():
-        #asd_label = Label(pop, text="asd", bg="black", width=15, height=15)
-        #asd_label.grid(row=9, column=0)
 
+#Definieren vom Threading
+        def start_submit_thread(event):
+            global submit_thread
+            submit_thread = threading.Thread(target=submit)
+            submit_thread.daemon = True
+            submit_thread.start()
 
-    #button einbinden zum submitten
-        pop_button = Button(pop, text="Generate", command=lambda: predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get())))
+        #button einbinden zum submitten
+        pop_button = Button(pop, text="Generate", command=lambda: start_submit_thread(None))
         pop_button.grid(row=9, column=0, columnspan=3, sticky=NSEW)
+        pop_button.configure(state=NORMAL)
 
-
+#Buttom zum Konfigurator
     def display_generate():
         selected_chart = gui_list.get(ANCHOR)
         if (selected_chart == ""):
@@ -175,7 +192,6 @@ def start_gui():
         else:
             display_popup()
             #predictTicker(selected_chart)
-
 
 
     display_start()
@@ -216,8 +232,6 @@ def start_gui():
     helpmenu.add_command(label="The data", command="")
     helpmenu.add_command(label="About us", command="")
     helpmenu.add_command(label="Quit", command=quit, accelerator="Alt+q")
-
-
 
 
     # -------------------------------------------------------------------------------------------------------------
@@ -267,17 +281,30 @@ def start_gui():
     for item in list_main_stocks:
         gui_list.insert(END, item)
 
+
+# Darstellung und Aktualisierung der Generierungs-Ergebnisse
+    def csv_reading():
+        selected = gui_list.get(ANCHOR)
+        if (selected == ""):
+            text_info = "Keine Aktie ausgewählt"
+        else:
+            text_info = pd.read_csv(
+                "./market_prediction/finance/displayResults/" + selected + ".csv", usecols=[1,2], index_col=0)
+        rightside3_text = Label(rightside, text=text_info, bg="#bed1bc", wraplength=280, justify="left", font=('Helvetica, 10'))
+        rightside3_text.grid(row=2, column=0, sticky=NSEW)
+        rightside4_text = Label(rightside, text="Ergebnisse der Prognosen-Generierung", wraplength=280, justify="center", font='Helvetica 12 bold', bg="#bed1bc")
+        rightside4_text.grid(row=2, column=0, sticky=N, pady=25)
+
     # text (rightside)
     rightside1_text = Label(rightside, text="Auswahl der Aktie", bg="#bed1bc", font=("times",14, "bold"))
     rightside1_text.grid(row=0, column=0, sticky=N, pady=5)
-    rightside2_text = Button(rightside, text="regenerate data", bg="#bed1bc", font=('Helvetica',12, "bold"), command=display_generate)
+    rightside2_text = Button(rightside, text="regenerate data", bg="#bed1bc", font=('Helvetica',12, "bold"), command= display_generate)
     rightside2_text.grid(row=1, column=0)
-    rightside3_text = Label(rightside, text="", bg="#bed1bc")
-    rightside3_text.grid(row=2, column=0, sticky=W, padx=5)
+
 
 
         # standardmäßig klasse als Vorlage nehmen, die keinen Graph zeigt
-    button_confirm = Button(rightside,  text="Aktie auswählen", bg="#bed1bc", font=('Helvetica',12, "bold"), command=display)
+    button_confirm = Button(rightside,  text="Aktie auswählen", bg="#bed1bc", font=('Helvetica',12, "bold"), command=lambda: [display(), csv_reading()])
     button_confirm.grid(column=0, row=0, sticky=S, pady=20)
 
 
@@ -286,9 +313,9 @@ def start_gui():
     root.mainloop()
     cef.Shutdown()
 
-#class BlankFrame():
 
 
+# ab hier: Klasse aus cefpython3. Aus cefpython-3-Github importiert; obere Methode bettet Methoden aus dieser Klasse ein
 class BrowserFrame(tk.Frame):
 
     def __init__(self, mainframe, navigation_bar=None):
@@ -315,8 +342,6 @@ class BrowserFrame(tk.Frame):
 
                                             # url ändern, je nach flash-funktion
 
-        #target -> HTML bei github hochgeladen & per Pages gepublished (vorerst/provisorisch)
-        #https://stackoverflow.com/questions/67996093/how-to-use-cefpython-to-add-a-webbrowser-widget-in-a-tkinter-window
         assert self.browser
         # self.browser.SetClientHandler(LifespanHandler(self))
         # self.browser.SetClientHandler(LoadHandler(self))
@@ -337,7 +362,6 @@ class BrowserFrame(tk.Frame):
     def on_configure(self, _):
         if not self.browser:
             self.embed_browser()
-
 
 
     def on_root_configure(self):
@@ -414,6 +438,17 @@ class FocusHandler(object):
 
     def OnGotFocus(self, **_):
         #logger.debug("FocusHandler.OnGotFocus")
+        pass
+
+class PrintLogger(): # create file like object
+    def __init__(self, label): # pass reference to text widget
+        self.label = label # keep ref
+
+    def write(self, text):
+        self.label['text'] += text # write text to textbox
+            # could also scroll to end of textbox here to make sure always visible
+
+    def flush(self): # needed for file like object
         pass
 
 start_gui()
