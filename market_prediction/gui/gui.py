@@ -1,31 +1,19 @@
+import ctypes
+import sys
 import tkinter as tk
 import tkinter.messagebox
-import logging
 import threading
+import pandas as pd
 from tkinter import *
 from cefpython3 import cefpython as cef
-import ctypes
-import os
-import sys
-import csv
-import pandas as pd
 from io import StringIO
 from finance.prediction import predictTicker
-#from PIL import ImageTk, Image
 
 def start_gui():
     root = Tk()
     cef.Initialize()
 
     root.geometry("1350x700")
-    #Grid.columnconfigure(root, 0, weight=1)
-    #Grid.rowconfigure(root, 0, weight=1)
-    #Grid.columnconfigure(root, 1, weight=1)
-    #Grid.rowconfigure(root, 1, weight=1)
-    #Grid.columnconfigure(root, 2, weight=1)
-    #Grid.columnconfigure(root, 3, weight=1)
-    #Grid.columnconfigure(root, 4, weight=1)
-
     root.title("Stock Market Prediction")
 
     # DEF
@@ -47,16 +35,7 @@ def start_gui():
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
 
-#TODO:
-        # df = pd.read_csv(baseUrl + selected +".csv")
-        # for item in df:
-            
-
         return url1
-
-
-    #--------------------------
-
 
     # EVENTS
     root.bind("<Alt-q>", quit)
@@ -64,12 +43,12 @@ def start_gui():
 
     def display_start():
         global url1
-        url1 = "https://i.ytimg.com/vi/if-2M3K1tqk/maxresdefault.jpg"
+        url1 = "https://i.imgur.com/wxjO2l1.png"
         browser_frame = BrowserFrame(mainside)
         browser_frame.place(x=0, y=0, anchor='nw', relwidth=1.0, relheight=1.0)
         return url1
 
-#...
+    #
     def display_popup():
         global pop
         pop = Toplevel(root)
@@ -78,6 +57,7 @@ def start_gui():
         pop.config(bg="#a8eda6")
         pop_label_width = 14
 
+        #
         def display_info(plain_info="Ändern Sie die Paramter, um die Prognose anzupassen. Je nach Wert wird das Ergebnis und der Zeitaufwand verändert."
                                     " Klicken Sie auf den Info-Button, falls sie sich unsicher sind. "
                                     "Die Standardwerte sind empfohlene Durchschnittswerte"):
@@ -87,7 +67,7 @@ def start_gui():
 
         display_info()
 
-    #Erstelen der Labels / Titel
+        #Erstelen der Labels / Titel
         pop_label = Label(pop, text="Ticker", fg="white", bg="#4c754b", width=pop_label_width)
         pop_label.grid(row = 0, column=0)
         pop_label1 = Label(pop, text="N_STEPS", fg="white", bg="#4c754b", width=pop_label_width)
@@ -105,8 +85,7 @@ def start_gui():
         pop_label7 = Label(pop, text="EPOCHS", fg="white", bg="#4c754b", width=pop_label_width)
         pop_label7.grid(row=7, column=0)
 
-#ticker, N_STEPS=50,LOOKUP_STEP = 50, TEST_SIZE = 0.2, N_LAYERS = 2, BIDIRECTIONAL = True, BATCH_SIZE = 64, EPOCHS = 1000
-#input Text als Entry-Widget
+        #
         selected_chart = gui_list.get(ANCHOR)
         pop_input = Entry(pop)
         pop_input.insert(END, selected_chart)
@@ -130,10 +109,10 @@ def start_gui():
         pop_input6.insert(END, "64")
         pop_input6.grid(row=6, column=1)
         pop_input7 = Entry(pop)
-        pop_input7.insert(END, "2")
+        pop_input7.insert(END, "500")
         pop_input7.grid(row=7, column=1)
 
-#Info-Panel einfügen
+        #Info-Panel einfügen
         ticker_info = "Ticker \n Aktiensymbol, das zu untersuchen ist [str]"
         n_steps_info = "n_steps \n Die Länge der historischen Sequenz (d. h. die Größe des Fensters), die für die Vorhersage verwendet wird [int]"
         lookup_step_info = "lookup_step \n der vorauszusagende zukünftige Suchschritt, default: 1 (z. B. nächster Tag) [int]"
@@ -143,6 +122,7 @@ def start_gui():
         batch_size_info = "batch_size_info \n Anzahl der in jeder Trainingsiteration verwendeten Datenproben [int]"
         epochs_info = "epochs_info \n Anzahl der Durchläufe des Algorithmus durch die gesamte Trainingsmenge; eine hohe Zahl wird empfohlen [int]"
 
+        #
         popup_text = "?"
         pop_info = Button(pop, text=popup_text, command=lambda: display_info(ticker_info))
         pop_info.grid(row=0, column=2)
@@ -161,7 +141,7 @@ def start_gui():
         pop_info7 = Button(pop, text=popup_text, command=lambda: display_info(epochs_info))
         pop_info7.grid(row=7, column=2)
 
-#Button zum Absenden der eingegeben Paramter
+        #Button zum Absenden der eingegeben Paramter
         def submit():
             info_label = Label(pop, text="", bg="#6f8f75", fg="white", width=45, height=15, wraplength=280, justify="left")
             info_label.grid(row=0, column=3, rowspan=10, padx=15, pady=5)
@@ -172,19 +152,19 @@ def start_gui():
             predictTicker(str(pop_input.get()), int(pop_input1.get()), int(pop_input2.get()), float(pop_input3.get()), int(pop_input4.get()), bool(pop_input5.get()), int(pop_input6.get()), int(pop_input7.get()))
 
 
-#Definieren vom Threading
+        #Definieren vom Threading
         def start_submit_thread(event):
             global submit_thread
             submit_thread = threading.Thread(target=submit)
             submit_thread.daemon = True
             submit_thread.start()
 
-        #button einbinden zum submitten
+        #button- einbinden zum submitten
         pop_button = Button(pop, text="Generate", command=lambda: start_submit_thread(None))
         pop_button.grid(row=9, column=0, columnspan=3, sticky=NSEW)
         pop_button.configure(state=NORMAL)
 
-#Buttom zum Konfigurator
+    #Buttom zum Konfigurator
     def display_generate():
         selected_chart = gui_list.get(ANCHOR)
         if (selected_chart == ""):
@@ -192,7 +172,6 @@ def start_gui():
         else:
             display_popup()
             #predictTicker(selected_chart)
-
 
     display_start()
 
@@ -228,47 +207,30 @@ def start_gui():
 
     helpmenu = Menu(menu)
     menu.add_cascade(label="Help", menu=helpmenu)
-    helpmenu.add_command(label="Features and Help", command="")
-    helpmenu.add_command(label="The data", command="")
-    helpmenu.add_command(label="About us", command="")
     helpmenu.add_command(label="Quit", command=quit, accelerator="Alt+q")
-
-
-    # -------------------------------------------------------------------------------------------------------------
-
-    # create left lower frame
-    #leftside = Frame(root, width=120, height=400, bg='red')
-    #leftside.grid(row=3, column=0, sticky="N", pady=15)
-
-    # create main/standard site
-
 
     # Create right span
     rightside = Frame(root, width=220)
     rightside.grid(row=0,  column=1)
 
-    # create right thing)
+    # create right thing
     rightside1 = Frame(rightside, width=220, height=200, bg='#bed1bc')
     rightside1.grid(row=0, column=0, rowspan=1, sticky='N', pady=5)
 
-    # create right thing)
+    # create right thing
     rightside2 = Frame(rightside, width=220, height=100, bg='#bed1bc')
     rightside2.grid(row=1, column=0, rowspan=1, sticky='NSEW', pady=5)
 
-    # create right thing)
+    # create right thing
     rightside3 = Frame(rightside, width=220, height=300, bg='#bed1bc')
     rightside3.grid(row=2, column=0, rowspan=1, sticky='S', pady=5)
-
-    # create upper buttonpack Datum) erstellen
-    #template_buttonpack_filter = Frame(root, bg="")
-    #template_buttonpack_filter.grid(row=0, column=1, sticky='NSEW', pady=5, padx=5)
 
     # create lower bracket
     lowerside = Frame(root, height=50, width=1330,bg="#7c877b")
     lowerside.grid(row=1, column=0, columnspan=2)
 
     # create lower text
-    lowerside_text = Label(root, text="Entwicklung und Implementierung eines Prognose-Systems für augewählte Kurse - prototyp",bg="#7c877b")
+    lowerside_text = Label(root, text="Entwicklung und Implementierung eines Prognose-Systems für augewählte Kurse.")
     lowerside_text.grid(row=1, column=0, columnspan=2, sticky=NSEW)
 
     # Liste der Aktien erstellen
@@ -281,8 +243,7 @@ def start_gui():
     for item in list_main_stocks:
         gui_list.insert(END, item)
 
-
-# Darstellung und Aktualisierung der Generierungs-Ergebnisse
+    # Darstellung und Aktualisierung der Generierungs-Ergebnisse
     def csv_reading():
         selected = gui_list.get(ANCHOR)
         if (selected == ""):
@@ -301,9 +262,7 @@ def start_gui():
     rightside2_text = Button(rightside, text="regenerate data", bg="#bed1bc", font=('Helvetica',12, "bold"), command= display_generate)
     rightside2_text.grid(row=1, column=0)
 
-
-
-        # standardmäßig klasse als Vorlage nehmen, die keinen Graph zeigt
+    # standardmäßig klasse als Vorlage nehmen, die keinen Graph zeigt
     button_confirm = Button(rightside,  text="Aktie auswählen", bg="#bed1bc", font=('Helvetica',12, "bold"), command=lambda: [display(), csv_reading()])
     button_confirm.grid(column=0, row=0, sticky=S, pady=20)
 
@@ -312,8 +271,6 @@ def start_gui():
     #window.geometry("1600x500")
     root.mainloop()
     cef.Shutdown()
-
-
 
 # ab hier: Klasse aus cefpython3. Aus cefpython-3-Github importiert; obere Methode bettet Methoden aus dieser Klasse ein
 class BrowserFrame(tk.Frame):

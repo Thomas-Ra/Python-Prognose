@@ -1,4 +1,4 @@
-#please use python version 3.7 or lower
+#Please use python version 3.7 or lower
 _version__ = 1.0
 
 import logging 
@@ -6,10 +6,8 @@ import sys
 import os
 from configparser import ConfigParser
 
+#Redirect Logging for prediction file 
 class StreamToLogger(object):
-    """
-    Fake file-like stream object that redirects writes to a logger instance.
-    """
     def __init__(self, logger, level):
         self.logger = logger
         self.level = level
@@ -22,7 +20,7 @@ class StreamToLogger(object):
     def flush(self):
         pass
 
-#start the webserver
+#Start the webserver
 def server_start():
     from webserver import server
     server.start_in_thread()
@@ -41,7 +39,7 @@ def init_config():
     SERVERCONFIG = config["SERVERCONFIG"]
     logging.basicConfig(filename=SERVERCONFIG["LOGGING_LOCATION"], level=SERVERCONFIG["LOGGING_LEVEL"])
     logging.info('Config initialized')
-    #redirect sysout to logger
+    #Redirect sysout to logger
     log = logging.getLogger('System')
     sys.stdout = StreamToLogger(log,logging.DEBUG)
     sys.stderr = StreamToLogger(log,logging.ERROR)
