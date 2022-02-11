@@ -11,6 +11,10 @@ pip install -r .\requirements.txt
 Um die Verarbeitung erheblich zu beschleunigen wird, wenn möglich, empfohlen die CUDA Umgebung für NVIDIA Grafikkarten zu installieren. Bitte dafür die hier aufgeführten Dependencies installieren:
 https://www.tensorflow.org/install/gpu#software_requirements
 
+### Cefpython 
+Zu credetieren ist hierbei auch das Modulbeispiel: https://github.com/cztomczak/cefpython/blob/master/examples/tkinter_.py 
+Dies wird genutzt für das einbinden von HTML Websiten in Tkinter. 
+
 - Woher weiß ich, dass die Installation erfolgreich war und meine Berechnung jetzt sehr viel schneller ist?
 Erfolg:
 ![Erfolg](./data/Cuda_Erfolg.png)

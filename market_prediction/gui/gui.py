@@ -190,21 +190,7 @@ def start_gui():
     filemenu.add_command(label="Startseite", command=display_start)
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command=root.quit)
-
-    gachamenu = Menu(menu)
-    menu.add_cascade(label="Aktien", menu=gachamenu)
-    gachamenu.add_command(label="AMZN", command=display)
-    gachamenu.add_separator()
-    gachamenu.add_command(label="AAPL", command=display)
-    gachamenu.add_separator()
-    gachamenu.add_command(label="GME", command=display)
-    gachamenu.add_separator()
-    gachamenu.add_command(label="GOOG", command=display)
-    gachamenu.add_separator()
-    gachamenu.add_command(label="MSFT", command=display)
-    gachamenu.add_separator()
-    gachamenu.add_command(label="TSLA", command=display)
-
+    # Quitmenue
     helpmenu = Menu(menu)
     menu.add_cascade(label="Help", menu=helpmenu)
     helpmenu.add_command(label="Quit", command=quit, accelerator="Alt+q")
