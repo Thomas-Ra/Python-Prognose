@@ -30,6 +30,8 @@ Stock info is based on the Nasdaq Stock Exchange in NYC.
 - Die Visualisierung wurde mithilfe der Plotly Doku umgesetzt: https://plotly.com/python/candlestick-charts/
 - Threading Einführung: https://realpython.com/intro-to-python-threading/
 
+- Die Bilder im Startbildschirm sind Eigentum des jeweiligen Unternehmens 
+
 # Start
 
 ``
